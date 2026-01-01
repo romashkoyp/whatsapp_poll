@@ -1,0 +1,67 @@
+name: WhatsApp Poll Automation
+
+on:
+  schedule:
+    # Run on Thursday at 10:00 UTC (13:00 Finnish time)
+    - cron: '0 10 * * 4'
+    # Run on Saturday at 07:00 UTC (10:00 Finnish time)
+    - cron: '0 7 * * 6'
+  
+  # Allow manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      force_run:
+        description: 'Force run regardless of day check'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  TZ: Europe/Helsinki
+
+jobs:
+  send-poll:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Display current time info
+        run: |
+          echo "Current UTC time: $(date -u)"
+          echo "Current Finnish time: $(TZ='Europe/Helsinki' date)"
+          echo "Day of week: $(TZ='Europe/Helsinki' date +%A)"
+
+      - name: Run WhatsApp poll script
+        env:
+          GREENAPI_URL: ${{ secrets.GREENAPI_URL }}
+          GREENAPI_INSTANCE_ID: ${{ secrets.GREENAPI_INSTANCE_ID }}
+          GREENAPI_API_TOKEN: ${{ secrets.GREENAPI_API_TOKEN }}
+          WHATSAPP_CHAT_ID: ${{ secrets.WHATSAPP_CHAT_ID }}
+          FORCE_RUN: ${{ github.event.inputs.force_run }}
+        run: |
+          echo "Starting WhatsApp poll automation..."
+          python main.py
+          echo "Script execution completed."
+
+      - name: Log workflow status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Workflow completed successfully"
+          else
+            echo "❌ Workflow failed with status: ${{ job.status }}"
+          fi
+

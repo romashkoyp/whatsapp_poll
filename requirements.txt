@@ -1,0 +1,12 @@
+# WhatsApp Poll Automation Dependencies
+# Pinned versions for reproducibility
+
+# HTTP requests library
+requests==2.32.3
+
+# Timezone handling
+pytz==2024.2
+
+# Environment variable management (for local development)
+python-dotenv==1.0.1
+
