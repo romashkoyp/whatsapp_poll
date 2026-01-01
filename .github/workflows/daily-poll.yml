@@ -3,7 +3,7 @@ name: WhatsApp Poll Automation
 on:
   schedule:
     # Run on Thursday at 10:00 UTC (UTC+2 winter Finnish time, UTC+3 summer Finnish time) 0 11 * * 2
-    - cron: '19 17 * * 4'
+    - cron: '24 17 * * *'
     # - cron: '30 18 * * 4'
     # Run on Saturday at 07:00 UTC (UTC+2 winter Finnish time, UTC+3 summer Finnish time)
     # https://crontab.guru/#0_7_*_*_6
