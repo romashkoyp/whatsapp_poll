@@ -47,7 +47,7 @@ def get_current_day_finnish_time() -> str:
 
 
 def get_message_for_day(day: str) -> Optional[str]:
-    if day == "thursday":
+    if day == "friday":
         return "Tänään vääntämään klo 18:00?"
     if day == "saturday":
         return "Tänään vääntämään klo 12:00?"
