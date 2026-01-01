@@ -2,6 +2,9 @@ name: WhatsApp Poll Automation
 
 on:
   schedule:
+    # Run on Thursday at 10:00 UTC (13:00 Finnish time)
+    - cron: '15 17 * * 4'
+    # Run on Saturday at 07:00 UTC (10:00 Finnish time)
     # Run on Thursday at 10:00 UTC (UTC+2 winter Finnish time, UTC+3 summer Finnish time) 0 11 * * 2
     - cron: '0 17 * * 4'
     - cron: '30 18 * * 4'
