@@ -2,19 +2,21 @@ name: WhatsApp Poll Automation
 
 on:
   schedule:
-    # Run on Thursday at 10:00 UTC (13:00 Finnish time)
-    - cron: '0 10 * * 4'
+    # Run every day every 5 minutes
+    - cron: '*/5 * * * *'
+    # Run on Thursday at 10:00 UTC
+    # - cron: '0 10 * * 4'
     # Run on Saturday at 07:00 UTC (10:00 Finnish time)
     - cron: '0 7 * * 6'
   
   # Allow manual trigger for testing
-  workflow_dispatch:
-    inputs:
-      force_run:
-        description: 'Force run regardless of day check'
-        required: false
-        default: false
-        type: boolean
+  # workflow_dispatch:
+  #   inputs:
+  #     force_run:
+  #       description: 'Force run regardless of day check'
+  #       required: false
+  #       default: false
+  #       type: boolean
 
 env:
   TZ: Europe/Helsinki
