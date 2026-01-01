@@ -10,13 +10,13 @@ on:
     - cron: '0 7 * * 6'
   
   # Allow manual trigger for testing
-  # workflow_dispatch:
-  #   inputs:
-  #     force_run:
-  #       description: 'Force run regardless of day check'
-  #       required: false
-  #       default: false
-  #       type: boolean
+  workflow_dispatch:
+    inputs:
+      force_run:
+        description: 'Force run regardless of day check'
+        required: false
+        default: 'false'
+        type: boolean
 
 env:
   TZ: Europe/Helsinki
