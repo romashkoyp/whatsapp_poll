@@ -1,0 +1,11 @@
+stages:
+  - send-poll
+
+send_poll:
+  stage: send-poll
+  image: python:3.11
+  script:
+    - pip install -r requirements.txt
+    - python main.py
+  only:
+    - schedules
