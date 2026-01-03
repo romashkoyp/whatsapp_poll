@@ -51,7 +51,7 @@ def get_message_for_day(day: str) -> Optional[str]:
         return "Tänään vääntämään klo 18:00? (test message)"
     if day == "saturday":
         return "Tänään vääntämään klo 12:00? (test message)" 
-    return None
+    return "Tänään vääntämään? (test message)"
 
 
 def build_payload(message: str) -> Dict[str, Any]:
@@ -122,7 +122,12 @@ def main() -> None:
         print(f"✅ Poll sent successfully!")
         print(f"📄 Response: {response.text}")
     except requests.RequestException as exc:
-        print(f"❌ Failed to send poll: {exc}")
+        resp = getattr(exc, "response", None)
+        if resp is not None:
+            print(f"❌ Failed to send poll: {resp.status_code} {resp.reason}")
+            print(f"📄 Error body: {resp.text}")
+        else:
+            print(f"❌ Failed to send poll: {exc}")
         sys.exit(1)
 
 
