@@ -54,7 +54,7 @@ GitHub Actions handles the automated execution of the poll script.
 
 ### Pipedream
 
-Pipedream provides an alternative automation platform for triggering the GitHub Actions workflow on a schedule.
+Pipedream provides an alternative automation platform for triggering the GitHub Actions workflow on a schedule. Useful service for testing cron intervals: https://cronjob.xyz/
 
 #### Workflow: Tuesday and Friday Poll Trigger
 
