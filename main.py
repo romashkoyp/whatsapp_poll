@@ -47,6 +47,37 @@ EXCEPTION_TEXT = "Tänään poikkeukselliset treenit."
 STANDARD_TEXT= "Tänään vääntämään klo"
 MESSAGE_ERROR = "❌ Invalid schedule data structure"
 REQUEST_TIMEOUT = 10  # seconds
+USE_SAMPLE_RESPONSE = False  # Set to True to use sample response data for testing
+
+# Sample response data
+SAMPLE_RESPONSE = {
+    "query": "*[_type == \"allDays\"]",
+    "result": [{
+        "_createdAt": "2026-01-06T10:43:55Z",
+        "_id": "7437c1ac-ec4b-4083-8702-fd341a810c36",
+        "_type": "allDays",
+        "_updatedAt": "2026-01-06T13:45:26Z",
+        "canceledDays": [
+            {"_key": "819b95f4119e", "_type": "canceledDay", "date": "2026-07-01"},
+            {"_key": "42a76733805e", "_type": "canceledDay", "date": "2025-08-11"},
+            {"_key": "658c41af5aca", "_type": "canceledDay", "date": "2025-09-23"},
+            {"_key": "953b0a74a43c", "_type": "canceledDay", "date": "2025-12-23"}
+        ],
+        "exceptionDays": [
+            {"_key": "a02e3811bc1f", "_type": "exceptionDay", "date": "2026-07-01", "endTime": "20:00", "startTime": "18:00"},
+            {"_key": "a042ac7b82ee", "_type": "exceptionDay", "date": "2025-08-12", "endTime": "20:00", "startTime": "18:00"},
+            {"_key": "8f41321d0606", "_type": "exceptionDay", "date": "2025-09-22", "endTime": "20:00", "startTime": "18:00"},
+            {"_key": "f4e1dff0840b", "_type": "exceptionDay", "date": "2025-12-22", "endTime": "20:00", "startTime": "18:00"}
+        ],
+        "title": "Arm Fight JKL ry - All Training Days",
+        "trainingDays": [
+            {"_key": "868a629380e9", "_type": "trainingDay", "endTime": "20:00", "startTime": "18:00", "weekDay": {"_type": "weekDay", "en": "Tuesday", "fi": "Tiistai", "key": "tuesday", "ru": "Вторник"}},
+            {"_key": "a0d933b309cd", "_type": "trainingDay", "endTime": "14:00", "startTime": "12:00", "weekDay": {"_type": "weekDay", "en": "Saturday", "fi": "Lauantai", "key": "saturday", "ru": "Суbbota"}}
+        ]
+    }],
+    "syncTags": ["s1:xXDwZQ"],
+    "ms": 2
+}
 
 
 def get_current_date() -> str:
@@ -168,7 +199,10 @@ def main() -> None:
     print(f"📅 Current date: {current_date}")
     print(f"📅 Current day of week: {current_day}")
 
-    schedule_data = get_schedule_data()
+    if USE_SAMPLE_RESPONSE:
+        schedule_data = SAMPLE_RESPONSE
+    else:
+        schedule_data = get_schedule_data()
 
     if schedule_data is None:
         sys.exit(1)
