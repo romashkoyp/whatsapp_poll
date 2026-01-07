@@ -1,4 +1,4 @@
-# WhatsApp Poll Automation
+# WhatsApp Automation
 
 An automated system for sending scheduled polls/messages to a WhatsApp group. This project uses GreenAPI to interact with WhatsApp, GitHub Actions for workflow execution, and Pipedream for cron-based scheduling triggers with Helsinki timezone, because GitHub Actions does not meet the requirements of precisely timed triggers (unpredictable delays).
 
