@@ -1,6 +1,36 @@
 # WhatsApp Poll Automation
 
-An automated system for sending scheduled polls to a WhatsApp group. This project uses GreenAPI to interact with WhatsApp, GitHub Actions for workflow execution, and Pipedream for cron-based scheduling triggers with Helsinki timezone, because GitHub Actions does not meet the requirements of precisely timed triggers (unpredictable delays).
+An automated system for sending scheduled polls/messages to a WhatsApp group. This project uses GreenAPI to interact with WhatsApp, GitHub Actions for workflow execution, and Pipedream for cron-based scheduling triggers with Helsinki timezone, because GitHub Actions does not meet the requirements of precisely timed triggers (unpredictable delays).
+
+## Message and Poll Variants
+
+- **Canceled Day**  
+  - Message:  
+    ```
+    Huomio, tänään treeni on peruttu!
+    ```
+  - Sent as a simple WhatsApp message.
+
+- **Exceptional Day**  
+  - Poll:  
+    ```
+    Huomio, poikkeuksellinen treeni! Tänään vääntämään klo {startTime}?
+    ```
+  - Sent as a WhatsApp poll with options:
+    - Kyllä
+    - Ei
+
+- **Regular Training Day**  
+  - Poll:  
+    ```
+    Tänään vääntämään klo {startTime}?
+    ```
+  - Sent as a WhatsApp poll with options:
+    - Kyllä
+    - Ei
+
+- **No Training**  
+  - No message is sent; script exits with info.
 
 ## Technology Stack
 
@@ -9,7 +39,7 @@ An automated system for sending scheduled polls to a WhatsApp group. This projec
 GreenAPI is a WhatsApp API service that enables programmatic interaction with WhatsApp, including sending polls to groups.
 
 - **How to use GreenAPI**: [GreenAPI before start](https://green-api.com/en/docs/before-start/)
-- **Documentation**: [GreenAPI sendPoll Documentation](https://green-api.com/en/docs/api/sending/SendPoll/)
+- **Documentation**: [sendPoll](https://green-api.com/en/docs/api/sending/SendPoll/), [sendMessage](https://green-api.com/en/docs/api/sending/SendMessage/)
 
 GreenAPI uses personal phone number as an instance. It works as an additional virtual device in cloud for WhatsApp account.
 
@@ -43,6 +73,7 @@ GitHub Actions handles the automated execution of the poll script.
    | `GREENAPI_INSTANCE_ID` | Your GreenAPI instance ID |
    | `GREENAPI_API_TOKEN` | Your GreenAPI API token |
    | `WHATSAPP_CHAT_ID` | Target WhatsApp group ID (format: `1234567890@g.us`) |
+   | `SANITY_SCHEDULE_URL` | URL to fetch training schedule from Sanity |
 
 4. **Enable GitHub Actions**:
    - Go to the **Actions** tab in your repository
@@ -100,7 +131,7 @@ Pipedream provides an alternative automation platform for triggering the GitHub 
 | `GREENAPI_INSTANCE_ID` | Yes | Your GreenAPI instance identifier |
 | `GREENAPI_API_TOKEN` | Yes | Authentication token for GreenAPI |
 | `WHATSAPP_CHAT_ID` | Yes | WhatsApp group ID to send polls to |
-| `FORCE_RUN` | No | Set to `true` to bypass day-of-week check |
+| `SANITY_SCHEDULE_URL` | Yes | URL to fetch training schedule from Sanity |
 
 ## Local Development
 
@@ -121,10 +152,10 @@ Pipedream provides an alternative automation platform for triggering the GitHub 
    python main.py
    ```
 
-## Poll Schedule
+## Development & Testing
 
-| Day | Time (Finnish) | Message |
-|-----|----------------|---------|
-| Tuesday | 13:00 | "Tänään vääntämään klo 18:00?" |
-| Saturday | 10:00 | "Tänään vääntämään klo 12:00?" |
+- To use sample schedule data (for testing), set `USE_SAMPLE_RESPONSE = True` in `main.py`.
 
+## License
+
+MIT

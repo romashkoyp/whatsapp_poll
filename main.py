@@ -42,8 +42,8 @@ API_URL_MESSAGE = (
 
 POSITIVE_ANSWER = "Kyllä"
 NEGATIVE_ANSWER = "Ei"
-CANCEL_TEXT = "Huom, tänään treeni peruttu!"
-EXCEPTION_TEXT = "Tänään poikkeukselliset treenit."
+CANCEL_TEXT = "Huomio, tänään treeni on peruttu!"
+EXCEPTION_TEXT = "Huomio, poikkeuksellinen treeni!"
 STANDARD_TEXT= "Tänään vääntämään klo"
 MESSAGE_ERROR = "❌ Invalid schedule data structure"
 REQUEST_TIMEOUT = 10  # seconds
