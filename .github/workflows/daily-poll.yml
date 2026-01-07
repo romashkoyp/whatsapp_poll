@@ -1,4 +1,4 @@
-name: WhatsApp Poll Automation
+name: WhatsApp Automation
 
 on:
   # Allow manual trigger for testing
@@ -38,15 +38,15 @@ jobs:
           echo "Current Finnish time: $(TZ='Europe/Helsinki' date)"
           echo "Day of week: $(TZ='Europe/Helsinki' date +%A)"
 
-      - name: Run WhatsApp poll script
+      - name: Run WhatsApp script
         env:
           GREENAPI_URL: ${{ secrets.GREENAPI_URL }}
           GREENAPI_INSTANCE_ID: ${{ secrets.GREENAPI_INSTANCE_ID }}
           GREENAPI_API_TOKEN: ${{ secrets.GREENAPI_API_TOKEN }}
           WHATSAPP_CHAT_ID: ${{ secrets.WHATSAPP_CHAT_ID }}
-          FORCE_RUN: ${{ github.event.inputs.force_run }}
+          SANITY_SCHEDULE_URL: ${{ secrets.SANITY_SCHEDULE_URL }}
         run: |
-          echo "Starting WhatsApp poll automation..."
+          echo "Starting WhatsApp automation..."
           python main.py
           echo "Script execution completed."
 
