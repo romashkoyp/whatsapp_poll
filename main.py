@@ -29,45 +29,104 @@ GREENAPI_URL = os.environ.get("GREENAPI_URL", "")
 GREENAPI_INSTANCE_ID = os.environ.get("GREENAPI_INSTANCE_ID", "")
 GREENAPI_API_TOKEN = os.environ.get("GREENAPI_API_TOKEN", "")
 CHAT_ID = os.environ.get("WHATSAPP_CHAT_ID", "")
-FORCE_RUN = os.environ.get("FORCE_RUN", "false").lower() == "true"
+SANITY_SCHEDULE_URL = os.environ.get("SANITY_SCHEDULE_URL", "")
 
 # Construct API URL from components
-API_URL = (
+API_URL_POLL = (
     f"{GREENAPI_URL}/waInstance{GREENAPI_INSTANCE_ID}/sendPoll/{GREENAPI_API_TOKEN}"
 )
 
-FIRST_OPTION = "Kyllä"
-SECOND_OPTION = "Ei"
+API_URL_MESSAGE = (
+    f"{GREENAPI_URL}/waInstance{GREENAPI_INSTANCE_ID}/sendMessage/{GREENAPI_API_TOKEN}" 
+)
+
+POSITIVE_ANSWER = "Kyllä"
+NEGATIVE_ANSWER = "Ei"
+CANCEL_TEXT = "Huom, tänään treeni peruttu!"
+EXCEPTION_TEXT = "Tänään poikkeukselliset treenit."
+STANDARD_TEXT= "Tänään vääntämään klo"
+MESSAGE_ERROR = "❌ Invalid schedule data structure"
 REQUEST_TIMEOUT = 10  # seconds
 
 
-def get_current_day_finnish_time() -> str:
+def get_current_date() -> str:
+    """Get current date in Finnish time zone (YYYY-MM-DD)."""
+    finnish_tz = pytz.timezone("Europe/Helsinki")
+    return datetime.now(finnish_tz).strftime("%Y-%m-%d")
+
+
+def get_current_day_of_week() -> str:
+    """Get day of week in Finnish time zone."""
     finnish_tz = pytz.timezone("Europe/Helsinki")
     return datetime.now(finnish_tz).strftime("%A").lower()
 
 
-def get_message_for_day(day: str) -> Optional[str]:
-    if day == "tuesday":
-        return "Tänään vääntämään klo 18:00? (test message)"
-    if day == "saturday":
-        return "Tänään vääntämään klo 12:00? (test message)" 
-    return "Tänään vääntämään? (test message)"
+def get_schedule_data() -> Optional[Dict[str, Any]]:
+    """Fetch training schedule data from Sanity."""
+    try:
+        response = requests.get(SANITY_SCHEDULE_URL, timeout=REQUEST_TIMEOUT)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as exc:
+        print(f"❌ Failed to fetch schedule from Sanity: {exc}")
+        return None
+
+
+def get_message_for_current_day(
+        data: Dict[str, Any],
+        current_date: str,
+        day_of_week: str
+    ) -> Optional[str]:
+    """Get the message for the current day based on schedule from Sanity."""
+    # Validate data structure
+    if 'result' not in data or not data['result']:
+        return MESSAGE_ERROR
+    
+    all_days = data['result'][0]
+    training_days = all_days['trainingDays']
+    canceled_days = all_days['canceledDays']
+    exception_days = all_days['exceptionDays']
+
+    if current_date in [d['date'] for d in canceled_days]:
+        return API_URL_MESSAGE, CANCEL_TEXT
+
+    if current_date in [d['date'] for d in exception_days]:
+        exception = next(d for d in exception_days if d['date'] == current_date)
+        start_time = exception['startTime']
+        poll_message = f"{EXCEPTION_TEXT} {STANDARD_TEXT} {start_time}?"
+        return API_URL_POLL, poll_message
+
+    if any(td['weekDay']['key'] == day_of_week for td in training_days):
+        training_day = next(td for td in training_days if td['weekDay']['key'] == day_of_week)
+        start_time = training_day['startTime']
+        poll_message = f"{STANDARD_TEXT} {start_time}?"
+        return API_URL_POLL, poll_message
+
+    return None
 
 
 def build_payload(message: str) -> Dict[str, Any]:
-    # Keep payload construction isolated for easier testing/extension.
+    if message == None:
+        return None
+    
+    if message == CANCEL_TEXT:
+        return {
+            "chatId": CHAT_ID,
+            "message": message,
+        }
+    
     return {
         "chatId": CHAT_ID,
         "message": message,
         "multipleAnswers": False,
         "options": [
-            {"optionName": FIRST_OPTION},
-            {"optionName": SECOND_OPTION},
+            {"optionName": POSITIVE_ANSWER},
+            {"optionName": NEGATIVE_ANSWER},
         ],
     }
 
 
-def send_poll(url: str, payload: Dict[str, Any]) -> Response:
+def send_message(url: str, payload: Dict[str, Any]) -> Response:
     response = requests.post(
         url,
         json=payload,
@@ -84,6 +143,7 @@ def validate_environment() -> bool:
         "GREENAPI_INSTANCE_ID": GREENAPI_INSTANCE_ID,
         "GREENAPI_API_TOKEN": GREENAPI_API_TOKEN,
         "WHATSAPP_CHAT_ID": CHAT_ID,
+        "SANITY_SCHEDULE_URL": SANITY_SCHEDULE_URL,
     }
 
     missing = [name for name, value in required_vars.items() if not value]
@@ -102,24 +162,33 @@ def main() -> None:
     if not validate_environment():
         sys.exit(1)
 
-    current_day = get_current_day_finnish_time()
-    print(f"📅 Current day: {current_day}")
+    current_date = get_current_date()
+    current_day = get_current_day_of_week()
 
-    message = get_message_for_day(current_day)
+    print(f"📅 Current date: {current_date}")
+    print(f"📅 Current day of week: {current_day}")
 
-    if not message:
-        if FORCE_RUN:
-            print("⚠️ Force run enabled, but no message configured for today.")
-        else:
-            print(f"ℹ️ No poll scheduled for {current_day}. Exiting.")
-        return
+    schedule_data = get_schedule_data()
 
-    print(f"📨 Preparing to send poll: {message}")
+    if schedule_data is None:
+        sys.exit(1)
 
-    payload = build_payload(message)
+    result = get_message_for_current_day(schedule_data, current_date, current_day)
+    if result is None:
+        print("ℹ️ No training scheduled for today. Exiting.")
+        sys.exit(0)
+    url, message = result
+
+    if message == MESSAGE_ERROR:
+        print(f"{MESSAGE_ERROR}")
+        sys.exit(1)
+
+    print(f"📨 Preparing to send message: {message}")
+
     try:
-        response = send_poll(API_URL, payload)
-        print(f"✅ Poll sent successfully!")
+        payload = build_payload(message)
+        response = send_message(url, payload)
+        print("✅ Message sent successfully")
         print(f"📄 Response: {response.text}")
     except requests.RequestException as exc:
         resp = getattr(exc, "response", None)
