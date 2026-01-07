@@ -181,7 +181,7 @@ def validate_environment() -> bool:
 
     if missing:
         print(f"❌ Missing required environment variables: {', '.join(missing)}")
-        print("Please set these variables in GitHub Secrets or your environment.")
+        print("Please set these variables in GitHub Secrets or your environment or yml.")
         return False
 
     return True
