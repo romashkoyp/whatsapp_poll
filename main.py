@@ -71,7 +71,7 @@ SAMPLE_RESPONSE = {
         ],
         "title": "Arm Fight JKL ry - All Training Days",
         "trainingDays": [
-            {"_key": "868a629380e9", "_type": "trainingDay", "endTime": "20:00", "startTime": "18:00", "weekDay": {"_type": "weekDay", "en": "Tuesday", "fi": "Tiistai", "key": "tuesday", "ru": "Вторник"}},
+            {"_key": "868a629380e9", "_type": "trainingDay", "endTime": "20:00", "startTime": "18:00", "weekDay": {"_type": "weekDay", "en": "Friday", "fi": "Tiistai", "key": "Friday", "ru": "Вторник"}},
             {"_key": "a0d933b309cd", "_type": "trainingDay", "endTime": "14:00", "startTime": "12:00", "weekDay": {"_type": "weekDay", "en": "Saturday", "fi": "Lauantai", "key": "saturday", "ru": "Суbbota"}}
         ]
     }],
@@ -127,8 +127,8 @@ def get_message_for_current_day(
         poll_message = f"{EXCEPTION_TEXT} {STANDARD_TEXT} {start_time}?"
         return API_URL_POLL, poll_message
 
-    if any(td['weekDay']['key'] == day_of_week for td in training_days):
-        training_day = next(td for td in training_days if td['weekDay']['key'] == day_of_week)
+    if any(td['weekDay']['key'].lower() == day_of_week for td in training_days):
+        training_day = next(td for td in training_days if td['weekDay']['key'].lower() == day_of_week)
         start_time = training_day['startTime']
         poll_message = f"{STANDARD_TEXT} {start_time}?"
         return API_URL_POLL, poll_message
@@ -201,8 +201,10 @@ def main() -> None:
 
     if USE_SAMPLE_RESPONSE:
         schedule_data = SAMPLE_RESPONSE
+        print("📄 Using sample schedule data for testing")
     else:
         schedule_data = get_schedule_data()
+        print("📄 Fetched schedule data")
 
     if schedule_data is None:
         sys.exit(1)
