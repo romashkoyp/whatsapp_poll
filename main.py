@@ -36,14 +36,8 @@ API_URL_POLL = (
     f"{GREENAPI_URL}/waInstance{GREENAPI_INSTANCE_ID}/sendPoll/{GREENAPI_API_TOKEN}"
 )
 
-API_URL_MESSAGE = (
-    f"{GREENAPI_URL}/waInstance{GREENAPI_INSTANCE_ID}/sendMessage/{GREENAPI_API_TOKEN}" 
-)
-
 POSITIVE_ANSWER = "Kyllä"
 NEGATIVE_ANSWER = "Ei"
-CANCEL_TEXT = "Huomio, tänään treeni on peruttu!"
-EXCEPTION_TEXT = "Huomio, poikkeuksellinen treeni!"
 STANDARD_TEXT= "Tänään vääntämään klo"
 MESSAGE_ERROR = "❌ Invalid schedule data structure"
 REQUEST_TIMEOUT = 10  # seconds
@@ -58,21 +52,21 @@ SAMPLE_RESPONSE = {
         "_type": "allDays",
         "_updatedAt": "2026-01-06T13:45:26Z",
         "canceledDays": [
-            {"_key": "819b95f4119e", "_type": "canceledDay", "date": "2026-07-01"},
+            {"_key": "819b95f4119e", "_type": "canceledDay", "date": "2026-03-03"},
             {"_key": "42a76733805e", "_type": "canceledDay", "date": "2025-08-11"},
             {"_key": "658c41af5aca", "_type": "canceledDay", "date": "2025-09-23"},
             {"_key": "953b0a74a43c", "_type": "canceledDay", "date": "2025-12-23"}
         ],
         "exceptionDays": [
-            {"_key": "a02e3811bc1f", "_type": "exceptionDay", "date": "2026-07-01", "endTime": "20:00", "startTime": "18:00"},
+            {"_key": "a02e3811bc1f", "_type": "exceptionDay", "date": "2026-03-03", "endTime": "20:00", "startTime": "18:00"},
             {"_key": "a042ac7b82ee", "_type": "exceptionDay", "date": "2025-08-12", "endTime": "20:00", "startTime": "18:00"},
             {"_key": "8f41321d0606", "_type": "exceptionDay", "date": "2025-09-22", "endTime": "20:00", "startTime": "18:00"},
             {"_key": "f4e1dff0840b", "_type": "exceptionDay", "date": "2025-12-22", "endTime": "20:00", "startTime": "18:00"}
         ],
         "title": "Arm Fight JKL ry - All Training Days",
         "trainingDays": [
-            {"_key": "868a629380e9", "_type": "trainingDay", "endTime": "20:00", "startTime": "18:00", "weekDay": {"_type": "weekDay", "en": "Friday", "fi": "Tiistai", "key": "Friday", "ru": "Вторник"}},
-            {"_key": "a0d933b309cd", "_type": "trainingDay", "endTime": "14:00", "startTime": "12:00", "weekDay": {"_type": "weekDay", "en": "Saturday", "fi": "Lauantai", "key": "saturday", "ru": "Суbbota"}}
+            {"_key": "868a629380e9", "_type": "trainingDay", "endTime": "20:00", "startTime": "18:00", "weekDay": {"_type": "weekDay", "en": "Tuesday", "fi": "Tiistai", "key": "Tuesday", "ru": "Вторник"}},
+            {"_key": "a0d933b309cd", "_type": "trainingDay", "endTime": "14:00", "startTime": "12:00", "weekDay": {"_type": "weekDay", "en": "Saturday", "fi": "Lauantai", "key": "Saturday", "ru": "Суbbota"}}
         ]
     }],
     "syncTags": ["s1:xXDwZQ"],
@@ -119,12 +113,12 @@ def get_message_for_current_day(
     exception_days = all_days['exceptionDays']
 
     if current_date in [d['date'] for d in canceled_days]:
-        return API_URL_MESSAGE, CANCEL_TEXT
+        return None
 
     if current_date in [d['date'] for d in exception_days]:
         exception = next(d for d in exception_days if d['date'] == current_date)
         start_time = exception['startTime']
-        poll_message = f"{EXCEPTION_TEXT} {STANDARD_TEXT} {start_time}?"
+        poll_message = f"{STANDARD_TEXT} {start_time}?"
         return API_URL_POLL, poll_message
 
     if any(td['weekDay']['key'].lower() == day_of_week for td in training_days):
@@ -139,12 +133,6 @@ def get_message_for_current_day(
 def build_payload(message: str) -> Dict[str, Any]:
     if message == None:
         return None
-    
-    if message == CANCEL_TEXT:
-        return {
-            "chatId": CHAT_ID,
-            "message": message,
-        }
     
     return {
         "chatId": CHAT_ID,
